@@ -20,10 +20,7 @@ func AuthorizationMiddleware(next http.Handler) http.Handler {
 			rw.WriteHeader(401)
 			return
 		}
-		params := mux.Vars(r)
-		tokenID := params["id"]
-		fmt.Println(tokenID)
-
+		tokenID := mux.Vars(r)["id"]
 		if profile != tokenID {
 			fmt.Println("ownership not matched")
 			rw.WriteHeader(401)

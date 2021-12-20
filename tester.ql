@@ -1,7 +1,8 @@
-import go
+import go   
+import Mux
 
-from Function println, DataFlow::CallNode call
+from Method get, RequestVars vars, DataFlow::CallNode call
 where
-  println.hasQualifiedName("fmt", "Println") and
-  call = println.getACall()
-select call
+  get.hasQualifiedName("net/http", "Header", "Get") and
+  call = get.getACall()
+select call, vars
