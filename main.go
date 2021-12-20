@@ -1,30 +1,46 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func TheLogger(next http.Handler) http.Handler {
+// Validate the ownership of the ID
+// Header "Authorization: ID" matches the supplied path ID
+// e.g. curl -v localhost:8000/account/123 -H "Authorization: 123"
+// In a real-world implementation, "Authorization: ID" would be a JWT claim
+func AuthorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		fmt.Println(fmt.Sprintf("%s %s", r.Method, r.URL.Path))
-		ctx := context.WithValue(r.Context(), "data", "data:test")
-		next.ServeHTTP(rw, r.WithContext(ctx))
+		profile := r.Header.Get("Authorization")
+		if len(profile) == 0 {
+			fmt.Println("missing auth token")
+			rw.WriteHeader(401)
+			return
+		}
+		params := mux.Vars(r)
+		tokenID := params["id"]
+		fmt.Println(tokenID)
+
+		if profile != tokenID {
+			fmt.Println("ownership not matched")
+			rw.WriteHeader(401)
+			return
+		}
+		next.ServeHTTP(rw, r)
 	})
 }
 
+func GetAccount(rw http.ResponseWriter, r *http.Request) {
+	io.WriteString(rw, `{"message": "hello world.."}`)
+}
+
 func main() {
-	r := http.NewServeMux()
-
-	r.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		getContextData := r.Context().Value("data")
-		fmt.Println(getContextData)
-		io.WriteString(rw, `{"message": "hello world.."}`)
-	})
-
-	m := TheLogger(r)
-
-	http.ListenAndServe(":8000", m)
+	fmt.Println("running...")
+	router := mux.NewRouter()
+	router.Handle("/account/{id}", AuthorizationMiddleware(http.HandlerFunc(GetAccount)))
+	http.Handle("/", router)
+	http.ListenAndServe(":8000", router)
 }
