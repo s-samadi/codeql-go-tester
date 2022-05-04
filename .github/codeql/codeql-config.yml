@@ -3,5 +3,5 @@ name: "CodeQL Config"
 disable-default-queries: false
 
 queries:
-    name: custom-go-ozzo-queries
+  - name: custom-go-ozzo-queries
     uses: codeql-goozzo/custom-queries@main
