@@ -1,0 +1,6 @@
+name: "CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+    uses: codeql-goozzo/custom-queries@main
