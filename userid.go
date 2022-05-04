@@ -35,12 +35,16 @@ var (
 type UserID struct {
 	Name         string
 	MobileNumber string
+	MiddleName   string
+	LastName     string 
 }
 
 func (a *UserID) Validate() error {
 	return validation.ValidateStruct(a,
 		validation.Field(&a.Name, validateAndLogError("Name", validation.Required, validation.Length(1, 25), validation.Match(nameMatcher))),
 		validation.Field(&a.MobileNumber, validateAndLogError("MobileNumber", validation.Required, validation.Length(6, 10), validation.Match(mobileNumberMatcher))),
+		validation.Field(&a.MiddleName, validateAndLogError("MiddleName", validation.Required ))),
+		validation.Field(&a.LastNamer, validateAndLogError("LastName",  validation.Length(6, 10))
 	)
 }
 
